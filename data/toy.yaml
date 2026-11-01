@@ -1,0 +1,13 @@
+# Ví dụ nhỏ ở mục 5.3 của bài (tr. 6).
+name: toy
+plan_items: []
+attributes:
+  - {id: X1, task_id: t1, task: "Acquire X1", cost: 0.5, preceding: [], required: false,
+     values: [0, 3], distribution: {type: categorical, probs: [0.5, 0.5]}}
+  - {id: X2, task_id: t2, task: "Acquire X2", cost: 0.5, preceding: [], required: false,
+     values: [1, 4], distribution: {type: categorical, probs: [0.5, 0.5]}}
+decisions: [0, 1]          # 0 = decline, 1 = accept
+information_structure:
+  default: toy
+  variants:
+    toy: "(X2 - X1) * f"

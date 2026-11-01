@@ -1,0 +1,132 @@
+# Mô hình Koffer, chép từ Voorberg et al. (2021), DSS 151:113632.
+# Nguồn: Bảng 2 (tr. 4), Bảng 3 (tr. 10), Bảng 4 (tr. 10), mục 7.2 (tr. 10).
+# KHÔNG sửa giá trị trong file này mà không ghi vào docs/assumptions.md.
+# Các chỗ đánh dấu "ambiguity" là điểm mơ hồ, xử lý theo PLAN.md mục 6.
+
+name: koffer
+source: "Voorberg et al. 2021, Tables 2-4"
+
+# Mục kế hoạch KHÔNG thu thập thông tin (tác vụ thủ tục và giai đoạn).
+# Tác vụ 1 "Koffer DIP" là giai đoạn gốc, chi phí 0, luôn mở, không đưa vào.
+plan_items:
+  - {id: alpha, name: "Obtain total repair cost (stage)", kind: stage, cost: 20, preceding: [], required: false}
+  - {id: beta,  name: "Obtain expected amount of repairs (stage)", kind: stage, cost: 0, preceding: [], required: true}
+  - {id: "2",   name: "Request permission market authority", kind: procedural, cost: 20, preceding: [], required: false}
+  - {id: "3",   name: "Collect contract information", kind: procedural, cost: 10, preceding: [], required: true}
+  - {id: "4",   name: "Collect customer information", kind: procedural, cost: 30, preceding: [], required: true}
+
+# Tác vụ thu thập thông tin: mỗi tác vụ gắn với đúng một thuộc tính.
+# Thứ tự A..I là thứ tự của Bảng 4 (và có lẽ là thứ tự vector ở Bảng 6, xem ambiguity A5).
+attributes:
+  - id: A
+    task_id: "5"
+    task: "Obtain net repair cost"
+    name: "Net repair cost"
+    cost: 10
+    preceding: [alpha]
+    required: false
+    values: [1500, 1700, 1900, 2100]
+    distribution: {type: uniform}
+  - id: B
+    task_id: "6"
+    task: "Obtain expected number of repairs"
+    name: "Expected number of repairs per year"
+    cost: 8
+    preceding: [beta]
+    required: false
+    values: [40, 60, 80, 100]
+    distribution: {type: binomial, p: 0.2}
+    ambiguity: "A1: paper says 'Binomial(0.2)'. Default: Binomial(n=3, p=0.2) over index 0..3 -> probs [0.512, 0.384, 0.096, 0.008]."
+  - id: C
+    task_id: "7"
+    task: "Check customer credibility"
+    name: "Customer creditworthiness"
+    cost: 2
+    preceding: []
+    required: true
+    values: [0, 1]
+    distribution: {type: bernoulli, p: 0.3}
+    ambiguity: "A2: default P(values[1]) = p."
+    note: "C does not appear in the printed Y formula; it only adds cost."
+  - id: D
+    task_id: "8"
+    task: "Estimate current market prices"
+    name: "Current mean market price"
+    cost: 100
+    preceding: ["2"]
+    required: false
+    values: [1700, 1900, 2100, 2300]
+    distribution: {type: categorical, probs: [0.125, 0.375, 0.375, 0.125]}
+  - id: E
+    task_id: "9"
+    task: "In-house capability check"
+    name: "In-house capability"
+    cost: 3
+    preceding: []
+    required: true
+    values: [0, 1]
+    distribution: {type: bernoulli, p: 0.6}
+    ambiguity: "A2: default P(values[1]) = p."
+  - id: F
+    task_id: "10"
+    task: "Determine PMA/DER"
+    name: "PMA/DER possibilities"
+    cost: 20
+    preceding: [alpha, A]
+    required: false
+    values: [100, 200]
+    distribution: {type: bernoulli, p: 0.3}
+    ambiguity: "A2: default P(values[1]=200) = p."
+  - id: G
+    task_id: "11"
+    task: "Determine over and aboves"
+    name: "Over and above options"
+    cost: 15
+    preceding: [alpha, A]
+    required: false
+    values: [0, 1]
+    distribution: {type: bernoulli, p: 0.5}
+  - id: H
+    task_id: "12"
+    task: "Fix contract length"
+    name: "Contract period (years)"
+    cost: 4
+    preceding: [beta]
+    required: false
+    values: [1, 2, 3, 4]
+    distribution: {type: categorical, probs: [0.1666666666666667, 0.3333333333333333, 0.3333333333333333, 0.1666666666666667]}
+  - id: I
+    task_id: "13"
+    task: "Obtain transport cost"
+    name: "Transportation cost"
+    cost: 12
+    preceding: ["4"]
+    required: false
+    values: [50, 100, 150, 200]
+    distribution: {type: uniform}
+
+# Lưu ý: "preceding: [A]" nghĩa là tác vụ thu thập A (task 5) phải xong trước.
+
+decisions: ["No bid", 1800, 2000, 2200]
+
+information_structure:
+  # Như in trong bài (tr. 10), ngoặc vuông bao cả phần chi phí (biến thể margin_all):
+  #   Y(s,f) = E * B * H * P(D >= f) * [f - A*(1 - 0.2*G) - F - I] ;  Y(s, No bid) = 0
+  #   D (giá thị trường) ~ Normal(mu = giá trị thuộc tính D, sigma = 200)
+  #   "Expected number of repairs" = B*H ; "Quote accepted" = P(D >= f)
+  # flat_costs trước đây tên là "paper" và được ghi nhầm là công thức in trong bài (xem A3).
+  market_price_sigma: 200
+  default: margin_all
+  variants:
+    margin_all:   "E*B*H*P*(f - A*(1-0.2*G) - F - I)"
+    margin_repair: "E*B*H*P*(f - A*(1-0.2*G)) - F - I"
+    flat_costs:   "E*B*H*P*f - A*(1-0.2*G) - F - I"
+    no_E_flat:    "B*H*P*f - A*(1-0.2*G) - F - I"
+    no_E_margin:  "B*H*P*(f - A*(1-0.2*G) - F - I)"
+  ambiguity: >
+    A3: no variant reproduces Table 5 or Table 6 (e.g. instance 2 has E=0 but profit 69,794).
+    The user chose margin_all as printed, with margin_repair as a comparison (see docs/assumptions.md).
+  # P = P(market price >= f) = 1 - Phi((f - D)/sigma). When D is unknown, take E_D[P].
+
+# Không gian trạng thái theo bài: 5^5 * 3^4 * 2^5 = 8,100,000
+expected_state_space: 8100000

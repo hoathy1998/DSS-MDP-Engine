@@ -1,0 +1,29 @@
+{
+  "config": {
+    "data": "data/toy.yaml",
+    "y_variant": "toy",
+    "y_expression": "(X2 - X1) * f",
+    "solver": "solve_recursive",
+    "tie_break": "A9",
+    "tie_tolerance": 1e-09,
+    "random_seed": null
+  },
+  "root_value": 1.0,
+  "root_action": "decide:1",
+  "root_action_values": {
+    "do:X1": 0.75,
+    "do:X2": 0.75,
+    "decide:0": 0.0,
+    "decide:1": 1.0
+  },
+  "after_observing_X2_4": {
+    "value": 2.5,
+    "action": "decide:1"
+  },
+  "paper_comparison": {
+    "assumption": "A8",
+    "paper_value_no_info": 0.5,
+    "paper_conclusion": "acquire X2",
+    "difference_root_value": 0.5
+  }
+}

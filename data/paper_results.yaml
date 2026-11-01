@@ -1,0 +1,27 @@
+# Kết quả công bố trong Voorberg et al. (2021). Dùng để so sánh, KHÔNG dùng làm đầu vào.
+
+table5:  # tr. 11, "Comparison MDP vs Decision Tree"
+  mdp:           {expected_profit: 15867.6, final_states: 136,  avg_retrieval_cost: 143.5,  expected_revenue: 16011.0}
+  decision_tree: {expected_profit: 8226.0,  final_states: 1254, avg_retrieval_cost: 100.06, expected_revenue: 8125.94}
+  note: "MDP: revenue - cost = 15867.5 (consistent). Tree: 8125.94 - 100.06 = 8025.88 != 8226.0 (inconsistent, A7)."
+
+table6:  # tr. 12, "Comparison of 9 instances". final_state order assumed [A,B,C,D,E,F,G,H,I] (A5)
+  - {instance: 1, final_state: [2100, 40, 1, 1900, 1, 100, 0, 1, 150], profit_mdp: 1656,  profit_tree: -122}
+  - {instance: 2, final_state: [1500, 100, 1, 2100, 0, 100, 1, 4, 100], profit_mdp: 69794, profit_tree: 65469}
+  - {instance: 3, final_state: [2100, 80, 1, 2100, 1, 200, 0, 1, 50],  profit_mdp: -45,   profit_tree: -45}
+  - {instance: 4, final_state: [2100, 40, 0, 2300, 0, 200, 0, 3, 150], profit_mdp: 16385, profit_tree: 14692}
+  - {instance: 5, final_state: [1900, 100, 0, 2300, 0, 200, 0, 4, 200], profit_mdp: -45,  profit_tree: -45}
+  - {instance: 6, final_state: [1900, 40, 0, 2300, 0, 200, 0, 3, 150], profit_mdp: -45,   profit_tree: -45}
+  - {instance: 7, final_state: [1500, 40, 1, 1900, 1, 100, 0, 1, 150], profit_mdp: -45,   profit_tree: -45}
+  - {instance: 8, final_state: [1700, 80, 1, 1700, 1, 100, 0, 2, 200], profit_mdp: 27416, profit_tree: 27419}
+  - {instance: 9, final_state: [1900, 60, 0, 1900, 0, 100, 1, 1, 150], profit_mdp: -45,   profit_tree: -45}
+
+required_cost_total: 45   # tasks 3 (10) + 4 (30) + 7/C (2) + 9/E (3) + beta (0); explains the -45 rows
+decision_tree_nodes: 14
+runtime: {minutes: 49, cpu: "Intel i5-8365U"}
+state_space: 8100000
+
+toy_example:  # mục 5.3, tr. 6
+  claimed: {value_no_info: 0.5, gain_acquire_X2: 0.75, conclusion: "acquire X2"}
+  correct: {value_no_info: 1.0, value_after_X2_gross: 1.25, value_after_X2_net: 0.75, optimal_action: "decide f=1 now"}
+  note: "A8: paper arithmetic error; see docs/paper_notes.md"

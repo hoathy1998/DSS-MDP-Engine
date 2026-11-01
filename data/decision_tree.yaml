@@ -1,0 +1,35 @@
+# Cây quyết định của Koffer, chép từ Fig. 8, Phụ lục A, tr. 14 (ảnh: docs/fig8_decision_tree.png).
+# Nút "check" = thực hiện tác vụ thu thập thuộc tính rồi rẽ nhánh theo giá trị (tính chi phí tác vụ).
+# Nút "do" = thực hiện các tác vụ/giai đoạn liệt kê (bỏ qua mục đã làm; tính chi phí).
+# Nút "decide" = quyết định cuối.
+# Trước khi quyết định, mọi tác vụ bắt buộc (3, 4, C/7, E/9, beta) phải xong; cây ghi rõ ở các nút "do".
+
+root: checkE
+nodes:
+  checkE:   {type: check, attribute: E, branches: {0: declineE, 1: stageBeta}}
+  declineE: {type: do, items: ["3", "4", C, beta], next: decline}
+  stageBeta: {type: do, items: [beta], next: checkB}
+  checkB:   {type: check, attribute: B, branches: {40: checkH_low, 60: checkH_low, 80: checkH_high, 100: checkH_high}}
+  checkH_low:  {type: check, attribute: H, branches: {1: decline347, 2: decline347, 3: stageAlpha, 4: stageAlpha}}
+  checkH_high: {type: check, attribute: H, branches: {1: decline347, 2: stageAlpha, 3: stageAlpha, 4: stageAlpha}}
+  stageAlpha: {type: do, items: [alpha], next: checkA}
+  checkA:   {type: check, attribute: A, branches: {1500: task2, 1700: task2, 1900: checkF, 2100: checkF}}
+  checkF:   {type: check, attribute: F, branches: {100: checkG, 200: task2}}
+  checkG:   {type: check, attribute: G, branches: {0: decline347, 1: task2}}
+  task2:    {type: do, items: ["2"], next: checkD}
+  checkD:   {type: check, attribute: D, branches: {1700: bid1800, 1900: bid1800, 2100: task4, 2300: task4}}
+  bid1800:  {type: do, items: ["3", "4", C], next: decide1800}
+  task4:    {type: do, items: ["4"], next: checkI}
+  checkI:   {type: check, attribute: I, branches: {50: bid2000, 100: bid2000, 150: bid2200, 200: bid2200}}
+  bid2000:  {type: do, items: ["3", C], next: decide2000}
+  bid2200:  {type: do, items: ["3", C], next: decide2200}
+  decline347: {type: do, items: ["3", "4", C], next: decline}
+  decline:    {type: decide, decision: "No bid"}
+  decide1800: {type: decide, decision: 1800}
+  decide2000: {type: decide, decision: 2000}
+  decide2200: {type: decide, decision: 2200}
+
+ambiguities:
+  - "Fig. 8 labels the left branch of Attribute A as 'A = 1900, 1200'; 1200 is not in dom(A). Read as 1900, 2100."
+  - "Line crossings around the two Attribute H nodes are hard to read. Default reading is above; alternatives are listed in docs/paper_notes.md."
+  - "With this reading only 3/9 instances of Table 6 match (5, 6, 9). A brute-force search over column orders of the binary attributes (C, E, G) and H-branch readings reached at most 6/9. See docs/paper_notes.md section 4."
