@@ -98,6 +98,12 @@ class DIPModel:
             return state[0][self._plan_index[task_id]] == 1
         return state[1][self.attribute_index[task_id]] != 0
 
+    def task(self, task_id: str) -> dict[str, Any]:
+        return self._tasks[task_id]
+
+    def is_required(self, task_id: str) -> bool:
+        return bool(self._tasks[task_id]["required"])
+
     def _task_cost(self, task_id: str) -> float:
         return float(self._tasks[task_id]["cost"])
 

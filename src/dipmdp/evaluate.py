@@ -3,16 +3,18 @@
 Metrics (Table 5): expected_profit, expected_revenue, avg_retrieval_cost, n_final_states,
 decision distribution (Fig. 7a), task usage share (Fig. 7b).
 
-policy_statistics walks every outcome the policy can reach, which equals averaging over the 16,384
-true-value scenarios because attributes the policy never acquires only enter through their expectation.
-
-TODO(Phase 4): scenarios(model), evaluate(policy, model) -> dict, consistency check S3.
+policy_statistics walks every outcome the policy can reach and scores each final state by E[Y | state].
+evaluate simulates all 16,384 true-value scenarios and scores each by Y at the true values (A6).
+The two agree because attributes the policy never acquires only enter through their expectation;
+criterion S3 checks this against the solver's root value.
 """
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
+from itertools import product
+from math import prod
 from typing import Any
 
 from dipmdp.information_structure import realised_y
@@ -65,6 +67,7 @@ class Run:
     cost: float
     revenue: float
     final_state: State
+    tasks: tuple[str, ...] = ()
 
     @property
     def profit(self) -> float:
@@ -74,9 +77,37 @@ class Run:
 def simulate_policy(model: DIPModel, act: Callable[[State], Action], true_values: dict[str, Any]) -> Run:
     """One case with known attribute values; revenue is Y at the true values (assumption A6)."""
     state, cost = model.root_state, 0.0
+    tasks: list[str] = []
     while True:
         action = act(state)
         if action[0] == "decide":
-            return Run(action[1], cost, realised_y(model, true_values, action[1]), state)
+            return Run(action[1], cost, realised_y(model, true_values, action[1]), state, tuple(tasks))
         cost -= model.reward(state, action)
+        tasks.append(action[1])
         state = model.do(state, action, true_values)
+
+
+def scenarios(model: DIPModel) -> Iterator[tuple[float, dict[str, Any]]]:
+    """Every combination of true attribute values, with its probability."""
+    ids = [attr["id"] for attr in model.attributes]
+    outcomes = [list(zip(attr["values"], model.attribute_probs[attr["id"]])) for attr in model.attributes]
+    for combo in product(*outcomes):
+        yield prod(p for _, p in combo), {attr_id: value for attr_id, (value, _) in zip(ids, combo)}
+
+
+def evaluate(
+    model: DIPModel,
+    act: Callable[[State], Action],
+    weighted_scenarios: Iterator[tuple[float, dict[str, Any]]] | None = None,
+) -> PolicyStatistics:
+    """Statistics of `act` over the scenarios; by default the independent ones of the model."""
+    stats = PolicyStatistics()
+    for prob, true_values in scenarios(model) if weighted_scenarios is None else weighted_scenarios:
+        run = simulate_policy(model, act, true_values)
+        stats.expected_revenue += prob * run.revenue
+        stats.avg_retrieval_cost += prob * run.cost
+        stats.decision_probs[run.decision] += prob
+        stats.final_states.add(run.final_state)
+        for task_id in run.tasks:
+            stats.task_usage[task_id] += prob
+    return stats
