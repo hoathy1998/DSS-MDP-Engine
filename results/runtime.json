@@ -1,0 +1,64 @@
+{
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 26 Model 96 Stepping 0, AuthenticAMD",
+    "cpu_count": 16,
+    "python": "3.11.18",
+    "numpy": "2.4.6",
+    "numba": "0.68.1"
+  },
+  "peak_process_memory_mb": 251.4,
+  "paper_runtime": {
+    "minutes": 49,
+    "cpu": "Intel i5-8365U"
+  },
+  "paper_state_space": 8100000,
+  "runs": {
+    "margin_all": {
+      "config": {
+        "data": "data/koffer.yaml",
+        "y_variant": "margin_all",
+        "y_expression": "E*B*H*P*(f - A*(1-0.2*G) - F - I)",
+        "a1": "binomial",
+        "a2": "p_on_second",
+        "tie_break": "A9",
+        "tie_tolerance": 1e-09,
+        "solver": "solve_array",
+        "random_seed": null
+      },
+      "policy_file": "results/policy_koffer.npz",
+      "n_states": 8100000,
+      "n_reachable": 640224,
+      "solve_seconds": 0.929,
+      "root_value": 8762.619367452522,
+      "root_action": [
+        "do",
+        "beta"
+      ],
+      "array_mb": 69.5
+    },
+    "margin_repair": {
+      "config": {
+        "data": "data/koffer.yaml",
+        "y_variant": "margin_repair",
+        "y_expression": "E*B*H*P*(f - A*(1-0.2*G)) - F - I",
+        "a1": "binomial",
+        "a2": "p_on_second",
+        "tie_break": "A9",
+        "tie_tolerance": 1e-09,
+        "solver": "solve_array",
+        "random_seed": null
+      },
+      "policy_file": "results/policy_koffer_margin_repair.npz",
+      "n_states": 8100000,
+      "n_reachable": 640224,
+      "solve_seconds": 0.581,
+      "root_value": 17506.470077111062,
+      "root_action": [
+        "do",
+        "beta"
+      ],
+      "array_mb": 69.5
+    }
+  }
+}
