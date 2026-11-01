@@ -8,8 +8,8 @@
 | 3. Giải đầy đủ | xong | 2026-11-01 | `solve_array` cho cùng V và π với `solve_recursive` trên Koffer rút gọn. 8.100.000 trạng thái, 640.224 đi tới được; dưới 1 giây khi đã có cache numba (`results/runtime.json`, S6). V(gốc): `margin_all` 8.762,62; `margin_repair` 17.506,47 |
 | 4. Đánh giá | xong | 2026-11-01 | S3 đạt (sai số khoảng 1e-11 trên 16.384 kịch bản). S5 đạt ở cả hai biến thể Y. `results/table5_repro.csv`, `table6_repro.csv`, `fig_decisions*.png`, `fig_task_usage*.png` |
 | 5. Mở rộng | xong | 2026-11-01 | Độ nhạy: mức thiệt khi không giải lại tối đa 0,05 (0,001%) với `margin_all`; phép thử căng thẳng xác nhận cách tính. Phụ thuộc D theo A (`results/dependence.csv`), giá trị thông tin (`results/value_of_information.csv`) |
-| 6. Demo Streamlit | xong | 2026-11-01 | pp/streamlit_app.py: mô phỏng hồ sơ Koffer và ví dụ nhỏ; 	ests/test_app.py chạy cả hai màn hình bằng AppTest. Server khởi động được, nhưng chưa xem giao diện bằng trình duyệt vì tiện ích Chrome không kết nối |
-| 7. Tổng hợp | chưa bắt đầu | | |
+| 6. Demo Streamlit | xong | 2026-11-01 | `app/streamlit_app.py`: mô phỏng hồ sơ Koffer và ví dụ nhỏ; `tests/test_app.py` chạy cả hai màn hình bằng AppTest. Server khởi động được, nhưng chưa xem giao diện bằng trình duyệt vì tiện ích Chrome không kết nối |
+| 7. Tổng hợp | xong | 2026-11-01 | `results/summary.md`, sinh bằng `scripts/make_summary.py` |
 
 Ghi chú 2026-11-01: thư mục môn học đổi tên thành `HK3.CS2208-DSS`. Đã chạy lại `python scripts/install_editable.py`; `dipmdp_dev.pth` trỏ đúng thư mục mới.
 

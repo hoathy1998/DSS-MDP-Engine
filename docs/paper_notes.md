@@ -36,7 +36,7 @@ X₁ ∈ {0, 3}, X₂ ∈ {1, 4}, mỗi giá trị có xác suất 0,5; Y = (X�
 ## 4. Hàm Y và Bảng 6 (A3, A5)
 
 - **Đính chính (Pha 2, đối chiếu ảnh tr. 10):** công thức in là Y = E·B·H·P(D ≥ f)·[f − A(1 − 0,2G) − F − I], ngoặc vuông bao cả phần chi phí. Đây là biến thể `margin_all`. Dòng `Y = E·B·H·P·f − A(1 − 0,2G) − F − I` là chép sai; biến thể này trước đây tên `paper`, nay đổi thành `flat_costs` trong `data/koffer.yaml`.
-- Trường hợp 1, 3, 7, 8 có cùng bộ giá trị nhị phân (1, 1, 0) ở ba cột C, E, G, nhưng chi phí của cây là 122, 45, 45 và 207. Trường hợp 4 có cả ba cột bằng 0 mà vẫn có lãi. Vì cây chỉ rẽ nhánh theo giá trị thuộc tính, không thứ tự cột nào của C, E, G giải thích được các dòng này.
+- Cây kiểm tra E đầu tiên, nên lợi nhuận −45 chỉ có thể xảy ra khi E = 0 (E = 1 thì còn phải làm thêm B và H). Trường hợp 1, 3, 7, 8 có cùng bộ giá trị (1, 1, 0) ở ba cột nhị phân, nên E như nhau dù đọc cột nào là E; vậy mà trường hợp 3, 7 cho −45 còn trường hợp 1 cho −122 và trường hợp 8 có lãi. Trường hợp 4 có cả ba cột bằng 0, nên E = 0, nhưng cây vẫn có lãi. Không thứ tự cột nào của C, E, G giải thích được các dòng này.
 - Hiệu chỉnh đầy đủ (`results/calibration.csv`, 900 dòng): tối đa 4/9 dòng Bảng 6 khớp, chủ yếu là các dòng −45.
 - Bảng 5 và Fig. 7 xác nhận cấu trúc: cây Fig. 8 với A1, A2 mặc định cho chi phí 100,06 và đúng 1.254 trạng thái kết thúc. Riêng lợi nhuận phụ thuộc Y thì không khớp: dò 108 cách đặt các số hạng chi phí (`results/y_variant_search.csv`) không có cách nào khớp đồng thời các số của Bảng 5.
 - Thử nhanh 5 biến thể (có hoặc không nhân E; trừ chi phí một lần hay theo từng lần sửa chữa) trên các trường hợp 1, 2, 4, 8: **không biến thể nào khớp** lợi nhuận của Bảng 6, sai lệch có khi tới vài lần.

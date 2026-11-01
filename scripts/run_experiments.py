@@ -185,7 +185,8 @@ def tornado(path: Path, rows: list[dict[str, Any]], y_variant: str, top: int = 1
     extreme = [row for row in rows if abs(row["delta"]) == 0.2]
     targets: dict[str, dict[float, dict[str, Any]]] = {}
     for row in extreme:
-        label = f"Chi phí {row['target']}" if row["kind"] == "cost" else f"Phân phối {row['target']}"
+        target = TASK_LABELS.get(row["target"], row["target"])
+        label = f"Chi phí {target}" if row["kind"] == "cost" else f"Phân phối {row['target']}"
         targets.setdefault(label, {})[row["delta"]] = row
     spread = lambda item: max(abs(r["resolved_profit"] - r["base_profit"]) for r in item[1].values())
     ranked = sorted(targets.items(), key=spread, reverse=True)[:top][::-1]

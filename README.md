@@ -20,12 +20,24 @@ voorberg-mdp-repro/
 │   ├── assumptions.md       nhật ký giả định A1, A2, …
 │   ├── progress.md          tiến độ theo pha
 │   └── fig8_decision_tree.png
-├── src/dipmdp/              mã nguồn (khung sẵn, cần hoàn thiện)
+├── src/dipmdp/              mã nguồn
 ├── scripts/                 các script chạy thực nghiệm
 ├── tests/                   kiểm thử
 ├── app/                     demo Streamlit
 ├── notebooks/               khám phá (tùy chọn)
-└── results/                 đầu ra (không commit file lớn)
+└── results/                 đầu ra (không commit file lớn); bắt đầu đọc từ summary.md
+```
+
+## Chạy lại kết quả
+
+```
+python scripts/solve_toy.py            # Pha 1
+python scripts/calibrate.py            # Pha 2
+python scripts/explore_y_variants.py   # Pha 2
+python scripts/solve_koffer.py         # Pha 3
+python scripts/run_experiments.py      # Pha 4-5
+python scripts/make_summary.py         # Pha 7
+streamlit run app/streamlit_app.py     # Pha 6, xem thử bộ khuyến nghị
 ```
 
 ## Bắt đầu
