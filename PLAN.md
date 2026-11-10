@@ -147,14 +147,14 @@ Mỗi pha kết thúc bằng: kiểm thử đạt, commit git, cập nhật `doc
 | Cây quyết định chép sai | Kiểm bằng 9 trường hợp; ghi lại các cách đọc khác |
 | Kết quả hòa giữa các hành động làm chính sách khác bài | Quy tắc hòa cố định (ưu tiên quyết định, rồi đến chi phí thấp) và ghi vào giả định |
 
-## 10. Cách làm với Claude Code trong VS Code
+## 10. Quy trình làm việc với Claude Code
 
-Mở thư mục `voorberg-mdp-repro` trong VS Code. Claude Code sẽ tự đọc `CLAUDE.md`. Làm lần lượt từng pha, xem diff và chạy kiểm thử trước khi commit. Gợi ý câu lệnh:
+Dự án được thực hiện với Claude Code trong VS Code; quy tắc cho công cụ nằm ở `CLAUDE.md`. Mỗi lần chỉ làm một pha, rà soát thay đổi và chạy kiểm thử trước khi commit:
 
-- Pha 0: "Đọc PLAN.md và CLAUDE.md. Thực hiện Pha 0, chạy pytest tests/test_data.py, rồi dừng."
-- Pha 1: "Thực hiện Pha 1. Viết DIPModel và solve_recursive cho đến khi tests/test_toy.py đạt. Không sửa file kiểm thử."
-- Pha 2: "Thực hiện Pha 2 đến hết scripts/calibrate.py. Dừng trước khi chọn cấu hình, cho mình xem bảng calibration."
-- Pha 3: "Thực hiện Pha 3. Đối chiếu solve_array với solve_recursive trên Koffer rút gọn trước khi chạy bản đầy đủ."
+- Pha 0: thiết lập, chạy `tests/test_data.py`.
+- Pha 1: viết `DIPModel` và `solve_recursive` cho đến khi `tests/test_toy.py` đạt, không sửa tệp kiểm thử.
+- Pha 2: làm đến hết `scripts/calibrate.py`, dừng lại để học viên xem bảng hiệu chỉnh và chọn cấu hình.
+- Pha 3: đối chiếu `solve_array` với `solve_recursive` trên Koffer rút gọn trước khi chạy bản đầy đủ.
 - Pha 4–7: tương tự, mỗi pha một lần.
 
-Khi Claude Code muốn đổi dữ liệu trong `data/` hoặc sửa kiểm thử đã viết sẵn, nó phải hỏi bạn trước (đã ghi trong CLAUDE.md).
+Mọi thay đổi dữ liệu trong `data/` hoặc kiểm thử viết sẵn đều phải được học viên đồng ý trước.

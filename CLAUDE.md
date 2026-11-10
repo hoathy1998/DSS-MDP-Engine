@@ -12,7 +12,7 @@
 6. Khi một kết quả khác bài báo, ghi chênh lệch rõ ràng thay vì chỉnh mô hình cho khớp mà không có căn cứ.
 
 ## Quy ước mã
-- Python 3.11, gói nguồn trong `src/dipmdp/`, cài bằng `python scripts/install_editable.py` (ghi đường dẫn tuyệt đối vào `dipmdp_dev.pth`; chạy lại sau khi đổi tên hoặc di chuyển thư mục dự án). Thư mục dự án hiện tại: `C:\Doris\uit-master\HK3.CS2208-DSS\voorberg-mdp-repro`.
+- Python 3.11, gói nguồn trong `src/dipmdp/`, cài bằng `python scripts/install_editable.py` (ghi đường dẫn tuyệt đối vào `dipmdp_dev.pth`; chạy lại sau khi đổi tên hoặc di chuyển thư mục dự án).
 - Tên biến, hàm, chú thích trong mã bằng tiếng Anh. Tài liệu trong `docs/` và `results/summary.md` bằng tiếng Việt.
 - Có type hint, hàm thuần khi có thể, không có biến toàn cục mang trạng thái.
 - Thứ tự thuộc tính luôn là thứ tự trong YAML. Giá trị chưa biết (⊥) mã hóa là chỉ số 0, giá trị thứ k mã hóa là k (1-based) trong mảng trạng thái.
