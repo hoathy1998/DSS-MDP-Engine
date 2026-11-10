@@ -6,3 +6,6 @@ results/*.npz
 results/*.pkl
 results/deploy/
 !results/.gitkeep
+# personal notes for the report and the video, kept out of the submission
+docs/cowork_brief.md
+docs/video_script.md

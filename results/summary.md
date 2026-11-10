@@ -13,14 +13,14 @@ Tệp này do `scripts/make_summary.py` sinh ra từ các tệp trong `results/`
 
 | Lựa chọn | Giá trị | Căn cứ |
 |---|---|---|
-| Y mặc định (A3) | `margin_all`: E·B·H·P(D ≥ f)·[f − A(1 − 0,2G) − F − I] | Công thức in ở tr. 10; người dùng chọn |
-| Y đối chứng (A3) | `margin_repair`: E·B·H·P(D ≥ f)·[f − A(1 − 0,2G)] − F − I | Gần số của bài hơn nhưng không có căn cứ trong bài; người dùng chọn làm đối chứng |
+| Y mặc định (A3) | `margin_all`: E·B·H·P(D ≥ f)·[f − A(1 − 0,2G) − F − I] | Công thức in ở tr. 10 |
+| Y đối chứng (A3) | `margin_repair`: E·B·H·P(D ≥ f)·[f − A(1 − 0,2G)] − F − I | Gần số của bài hơn nhưng không có căn cứ trong bài; chỉ dùng để đối chứng |
 | Phân phối B (A1) | Binomial(n = 3, p = 0,2) | Khớp chi phí, số trạng thái ở Bảng 5 và Fig. 7 |
 | Bernoulli (A2) | p ứng với giá trị thứ hai | Như trên |
 | Cây quyết định (A5) | Đọc theo Fig. 8 | Như trên |
 | Quy tắc hòa (A9, A10) | Quyết định trước, chi phí thấp hơn, rồi thứ tự trong tệp; dung sai 1e-9 | Bài không nêu |
 
-`data/koffer.yaml` ban đầu chép sai công thức: biến thể tên `paper` thiếu ngoặc vuông của tr. 10. Với sự đồng ý của người dùng, biến thể này đổi tên thành `flat_costs`; không giá trị số nào thay đổi.
+`data/koffer.yaml` ban đầu chép sai công thức: biến thể tên `paper` thiếu ngoặc vuông của tr. 10. Biến thể này đã được đổi tên thành `flat_costs`; không giá trị số nào thay đổi.
 
 ## 3. So với Bảng 5
 
@@ -107,7 +107,7 @@ V(gốc) = 1,0, hành động tối ưu là nhận ngay (f = 1); thu thập X₁
 | S4 | Cây kiểm với 9 trường hợp, giải thích mọi chỗ lệch | Khớp 3/9; phần lệch được giải thích ở mục 5 | `tests/test_decision_tree.py` |
 | S5 | Đúng xu hướng Bảng 5 | Đạt, cả hai biến thể Y | `results/table5_repro.csv` |
 | S6 | Ghi số trạng thái, thời gian, bộ nhớ, máy | Đạt | `results/runtime.json` |
-| S7 | Mọi giả định có mã | A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14 | `docs/assumptions.md` |
+| S7 | Mọi giả định có mã | A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15 | `docs/assumptions.md` |
 
 ## 10. Giới hạn
 

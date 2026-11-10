@@ -1,7 +1,6 @@
 """Drives the Streamlit demo headlessly through both pages."""
 from pathlib import Path
 
-import pytest
 from streamlit.testing.v1 import AppTest
 
 APP = str(Path(__file__).resolve().parents[1] / "app" / "streamlit_app.py")
