@@ -11,6 +11,16 @@
 | 6. Demo Streamlit | xong | 2026-11-01 | `app/streamlit_app.py`: mô phỏng hồ sơ Koffer và ví dụ nhỏ; `tests/test_app.py` chạy cả hai màn hình bằng AppTest. Server khởi động được, nhưng chưa xem giao diện bằng trình duyệt vì tiện ích Chrome không kết nối |
 | 7. Tổng hợp | xong | 2026-11-01 | `results/summary.md`, sinh bằng `scripts/make_summary.py` |
 
+Ghi chú 2026-11-01: thêm hệ thống hai pha theo Fig. 1, ngoài kế hoạch (`src/dipmdp/system/`, `docs/system.md`, `tests/test_system.py`).
+
+Ghi chú 2026-11-06: màn hình của hệ thống hai pha có thêm sơ đồ vòng điều phối và sơ đồ quy trình hồ sơ (tô sáng bước hiện tại), khung quy định quy trình và chế độ tự chạy theo khuyến nghị. Engine báo lỗi kèm tên quy định bị vi phạm.
+
+Ghi chú 2026-11-06: thêm `docs/cowork_brief.md` (tài liệu nguồn để viết báo cáo), `docs/video_script.md` (kịch bản quay video), `scripts/demo.py` và `scripts/demo_rule_check.py` (chạy demo khi quay).
+
+Ghi chú 2026-11-06: khi làm khác khuyến nghị, hệ thống báo mức thiệt kỳ vọng, ghi lý do của người quyết định và tổng hợp khi đóng hồ sơ. Kịch bản video có đoạn 2.4: ở hồ sơ seed 42, người quản lý theo kinh nghiệm chốt thời hạn hợp đồng trước khi báo giá (thiệt kỳ vọng 4,0).
+
+Ghi chú 2026-11-01: thêm bản demo web ngoài kế hoạch (`web/koffer_demo.html`, sinh bằng `scripts/build_web_demo.py`). Bản JavaScript khớp bộ giải Python trên 640.224 trạng thái đi tới được (`tests/test_web_demo.py`).
+
 Ghi chú 2026-11-01: thư mục môn học đổi tên thành `HK3.CS2208-DSS`. Đã chạy lại `python scripts/install_editable.py`; `dipmdp_dev.pth` trỏ đúng thư mục mới.
 
 Ghi chú 2026-11-01: `model.py`, `solver.py` và `load_model` có sẵn từ trước, được ghi lúc 15:49 trong khi đang làm Pha 0; người dùng cho rằng có thể do phiên làm việc trước. Rà soát lại và sửa các lỗi `tests/test_toy.py` không phát hiện được: `observe` nhầm giá trị với chỉ số; biến thể Y không tồn tại cho Y = 0; quy tắc hòa sai so với A9; E[Y] sai với Y không đa tuyến tính (nay duyệt toàn bộ giá trị chưa biết); mô hình không có quyết định hoặc bị khóa vẫn trả về giá trị thay vì báo lỗi.

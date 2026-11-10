@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='utf-8'?>
+<cmmn:definitions xmlns:cmmn="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:dip="urn:dipmdp:extensions" id="Definitions_koffer" targetNamespace="urn:dipmdp:extensions">
+  <cmmn:case id="Case_koffer" name="koffer">
+    <cmmn:caseFileModel id="CaseFile">
+      <cmmn:caseFileItem id="CFI_A" name="Net repair cost" />
+      <cmmn:caseFileItem id="CFI_B" name="Expected number of repairs per year" />
+      <cmmn:caseFileItem id="CFI_C" name="Customer creditworthiness" />
+      <cmmn:caseFileItem id="CFI_D" name="Current mean market price" />
+      <cmmn:caseFileItem id="CFI_E" name="In-house capability" />
+      <cmmn:caseFileItem id="CFI_F" name="PMA/DER possibilities" />
+      <cmmn:caseFileItem id="CFI_G" name="Over and above options" />
+      <cmmn:caseFileItem id="CFI_H" name="Contract period (years)" />
+      <cmmn:caseFileItem id="CFI_I" name="Transportation cost" />
+    </cmmn:caseFileModel>
+    <cmmn:casePlanModel id="CasePlan" name="koffer" autoComplete="false">
+      <cmmn:planItem id="PI_alpha" definitionRef="S_alpha">
+        <cmmn:itemControl>
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_beta" definitionRef="S_beta">
+        <cmmn:itemControl>
+          <cmmn:requiredRule />
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_2" definitionRef="T_2">
+        <cmmn:itemControl>
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_3" definitionRef="T_3">
+        <cmmn:itemControl>
+          <cmmn:requiredRule />
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_4" definitionRef="T_4">
+        <cmmn:itemControl>
+          <cmmn:requiredRule />
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_C" definitionRef="T_C">
+        <cmmn:itemControl>
+          <cmmn:requiredRule />
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_D" definitionRef="T_D">
+        <cmmn:itemControl>
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+        <cmmn:entryCriterion id="EC_D" sentryRef="Sentry_D" />
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_E" definitionRef="T_E">
+        <cmmn:itemControl>
+          <cmmn:requiredRule />
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_I" definitionRef="T_I">
+        <cmmn:itemControl>
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+        <cmmn:entryCriterion id="EC_I" sentryRef="Sentry_I" />
+      </cmmn:planItem>
+      <cmmn:planItem id="PI_decide" definitionRef="T_decide">
+        <cmmn:itemControl>
+          <cmmn:manualActivationRule />
+        </cmmn:itemControl>
+      </cmmn:planItem>
+      <cmmn:sentry id="Sentry_D">
+        <cmmn:planItemOnPart sourceRef="PI_2">
+          <cmmn:standardEvent>complete</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+      <cmmn:sentry id="Sentry_I">
+        <cmmn:planItemOnPart sourceRef="PI_4">
+          <cmmn:standardEvent>complete</cmmn:standardEvent>
+        </cmmn:planItemOnPart>
+      </cmmn:sentry>
+      <cmmn:humanTask id="T_2" name="Request permission market authority" />
+      <cmmn:humanTask id="T_3" name="Collect contract information" />
+      <cmmn:humanTask id="T_4" name="Collect customer information" />
+      <cmmn:humanTask id="T_C" name="Check customer credibility">
+        <cmmn:extensionElements>
+          <dip:acquires attribute="C" taskNumber="7" />
+        </cmmn:extensionElements>
+      </cmmn:humanTask>
+      <cmmn:humanTask id="T_D" name="Estimate current market prices">
+        <cmmn:extensionElements>
+          <dip:acquires attribute="D" taskNumber="8" />
+        </cmmn:extensionElements>
+      </cmmn:humanTask>
+      <cmmn:humanTask id="T_E" name="In-house capability check">
+        <cmmn:extensionElements>
+          <dip:acquires attribute="E" taskNumber="9" />
+        </cmmn:extensionElements>
+      </cmmn:humanTask>
+      <cmmn:humanTask id="T_I" name="Obtain transport cost">
+        <cmmn:extensionElements>
+          <dip:acquires attribute="I" taskNumber="13" />
+        </cmmn:extensionElements>
+      </cmmn:humanTask>
+      <cmmn:humanTask id="T_decide" name="Decision-making task">
+        <cmmn:extensionElements>
+          <dip:decisionTask />
+        </cmmn:extensionElements>
+      </cmmn:humanTask>
+      <cmmn:stage id="S_alpha" name="Obtain total repair cost (stage)" autoComplete="false">
+        <cmmn:planItem id="PI_A" definitionRef="T_A">
+          <cmmn:itemControl>
+            <cmmn:manualActivationRule />
+          </cmmn:itemControl>
+        </cmmn:planItem>
+        <cmmn:planItem id="PI_F" definitionRef="T_F">
+          <cmmn:itemControl>
+            <cmmn:manualActivationRule />
+          </cmmn:itemControl>
+          <cmmn:entryCriterion id="EC_F" sentryRef="Sentry_F" />
+        </cmmn:planItem>
+        <cmmn:planItem id="PI_G" definitionRef="T_G">
+          <cmmn:itemControl>
+            <cmmn:manualActivationRule />
+          </cmmn:itemControl>
+          <cmmn:entryCriterion id="EC_G" sentryRef="Sentry_G" />
+        </cmmn:planItem>
+        <cmmn:sentry id="Sentry_F">
+          <cmmn:planItemOnPart sourceRef="PI_A">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+        </cmmn:sentry>
+        <cmmn:sentry id="Sentry_G">
+          <cmmn:planItemOnPart sourceRef="PI_A">
+            <cmmn:standardEvent>complete</cmmn:standardEvent>
+          </cmmn:planItemOnPart>
+        </cmmn:sentry>
+        <cmmn:humanTask id="T_A" name="Obtain net repair cost">
+          <cmmn:extensionElements>
+            <dip:acquires attribute="A" taskNumber="5" />
+          </cmmn:extensionElements>
+        </cmmn:humanTask>
+        <cmmn:humanTask id="T_F" name="Determine PMA/DER">
+          <cmmn:extensionElements>
+            <dip:acquires attribute="F" taskNumber="10" />
+          </cmmn:extensionElements>
+        </cmmn:humanTask>
+        <cmmn:humanTask id="T_G" name="Determine over and aboves">
+          <cmmn:extensionElements>
+            <dip:acquires attribute="G" taskNumber="11" />
+          </cmmn:extensionElements>
+        </cmmn:humanTask>
+      </cmmn:stage>
+      <cmmn:stage id="S_beta" name="Obtain expected amount of repairs (stage)" autoComplete="false">
+        <cmmn:planItem id="PI_B" definitionRef="T_B">
+          <cmmn:itemControl>
+            <cmmn:manualActivationRule />
+          </cmmn:itemControl>
+        </cmmn:planItem>
+        <cmmn:planItem id="PI_H" definitionRef="T_H">
+          <cmmn:itemControl>
+            <cmmn:manualActivationRule />
+          </cmmn:itemControl>
+        </cmmn:planItem>
+        <cmmn:humanTask id="T_B" name="Obtain expected number of repairs">
+          <cmmn:extensionElements>
+            <dip:acquires attribute="B" taskNumber="6" />
+          </cmmn:extensionElements>
+        </cmmn:humanTask>
+        <cmmn:humanTask id="T_H" name="Fix contract length">
+          <cmmn:extensionElements>
+            <dip:acquires attribute="H" taskNumber="12" />
+          </cmmn:extensionElements>
+        </cmmn:humanTask>
+      </cmmn:stage>
+    </cmmn:casePlanModel>
+  </cmmn:case>
+</cmmn:definitions>

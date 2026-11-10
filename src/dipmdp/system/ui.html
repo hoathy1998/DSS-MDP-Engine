@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bàn điều phối Koffer</title>
+<style>
+/* Layout: two columns. Left, the case and its process diagrams; right, kept in view while the left scrolls,
+   the recommendation with its expected values, then the process rules and the live event feed. */
+:root {
+  --bg: #eef2f1; --panel: #fbfdfc; --ink: #15211f; --muted: #55645f; --line: #c3cfcb; --faint: #e3e9e7;
+  --accent: #0d6657; --accent-ink: #ffffff; --accent-soft: #d9eee8; --alert: #a34a12; --alert-soft: #f8e6d8;
+  --sans: "Segoe UI", system-ui, sans-serif; --mono: ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1615; --panel: #172120; --ink: #e5eeeb; --muted: #9aaaa5; --line: #3a4946; --faint: #222e2c;
+    --accent: #62cfb7; --accent-ink: #08201b; --accent-soft: #143530; --alert: #eda06b; --alert-soft: #3a2415;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--sans); padding: 16px; }
+#app { max-width: 1320px; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+h1 { font-size: 1.35rem; margin: 0; }
+h2 { font-size: 1rem; margin: 0; }
+h3 { font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+p { margin: 0; } ul, ol { list-style: none; margin: 0; padding: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.top { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: baseline; }
+.meta { font: 400 .78rem var(--mono); color: var(--muted); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 14px; align-items: start; }
+.side { display: grid; gap: 14px; min-width: 0; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+.stack { display: grid; gap: 10px; min-width: 0; }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.picker select { font: 500 .85rem var(--mono); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; max-width: 100%; }
+details.panel > summary { cursor: pointer; font-weight: 600; }
+details.panel[open] > summary { margin-bottom: 4px; }
+svg.diagram.loop { max-width: 700px; } svg.diagram.process { max-width: 790px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.primary { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px; padding: 7px 12px; font-weight: 600; }
+.toggle { background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; padding: 6px 12px; font-weight: 600; }
+.toggle[aria-pressed="true"] { background: var(--accent-soft); }
+.head { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
+
+/* Diagrams */
+svg.diagram { width: 100%; height: auto; display: block; font-family: var(--sans); }
+.diagram text { fill: var(--ink); font-size: 12px; }
+.diagram .sub { fill: var(--muted); font-size: 10.5px; }
+.diagram .edge { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.diagram .edge.on { stroke: var(--accent); }
+.diagram .edge-label { fill: var(--muted); font-size: 10.5px; }
+.diagram .arrow { fill: var(--line); } .diagram .arrow-on { fill: var(--accent); }
+.diagram .stage-box { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.node .halo { fill: none; stroke: none; }
+.node rect.box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+.node .req { fill: var(--ink); }
+.node .glyph { font: 600 13px var(--sans); text-anchor: end; }
+.node.done rect.box { fill: var(--accent-soft); stroke: var(--accent); }
+.node.done .glyph { fill: var(--accent); }
+.node.open rect.box { stroke: var(--ink); }
+.node.open, .node.best { cursor: pointer; }
+.node.open:hover rect.box { stroke: var(--accent); stroke-width: 2; }
+.node.best rect.box { fill: var(--accent); stroke: var(--accent); stroke-width: 2.5; }
+.node.best text, .node.best .sub { fill: var(--accent-ink); }
+.node.best .req { fill: var(--accent-ink); }
+.node.best .halo, .node.running .halo, .node.current .halo { fill: none; stroke-width: 6; opacity: .35; animation: pulse 1.6s ease-in-out infinite; }
+.node.best .halo, .node.current .halo { stroke: var(--accent); }
+.node.running rect.box { fill: var(--alert-soft); stroke: var(--alert); stroke-width: 2; }
+.node.running .halo { stroke: var(--alert); }
+.node.running .glyph { fill: var(--alert); }
+.node.waiting rect.box { stroke-dasharray: 4 3; }
+.node.locked { opacity: .5; } .node.locked rect.box { stroke-dasharray: 4 3; fill: var(--faint); }
+.node.skipped { opacity: .45; }
+.node.current rect.box { fill: var(--accent); stroke: var(--accent); stroke-width: 2.5; }
+.node.current text, .node.current .sub { fill: var(--accent-ink); }
+.node.past rect.box { stroke: var(--accent); }
+.gate rect { fill: none; stroke: var(--line); stroke-dasharray: 3 2; } .gate.ok rect { fill: var(--accent); stroke: var(--accent); stroke-dasharray: none; }
+.gate text { font: 600 10.5px var(--mono); text-anchor: middle; fill: var(--muted); } .gate.ok text { fill: var(--accent-ink); }
+@keyframes pulse { 0%, 100% { opacity: .15; } 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .halo { animation: none !important; } }
+.info { min-height: 3em; font-size: .84rem; border-left: 3px solid var(--accent); padding: 4px 10px; background: var(--faint); border-radius: 0 4px 4px 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .74rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { display: inline-block; width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid var(--line); background: var(--panel); }
+.legend i.best { background: var(--accent); border-color: var(--accent); } .legend i.open { border-color: var(--ink); }
+.legend i.running { background: var(--alert-soft); border-color: var(--alert); } .legend i.done { background: var(--accent-soft); border-color: var(--accent); }
+.legend i.locked { background: var(--faint); border-style: dashed; opacity: .6; }
+.legend i.req { width: 5px; border: 0; background: var(--ink); border-radius: 1px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; border-block: 1px solid var(--line); padding-block: 8px; }
+.stats div { display: grid; } .l { font-size: .74rem; color: var(--muted); } .v2 { font: 500 1.05rem var(--mono); }
+.actions { display: grid; gap: 5px; }
+.action { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; text-align: left; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; align-items: center; }
+.action:hover { border-color: var(--accent); }
+.action.best { border-color: var(--accent); background: var(--accent-soft); }
+.q { font: 500 .98rem var(--mono); }
+.pill { white-space: nowrap; margin-left: 8px; padding: 0 6px; border-radius: 3px; background: var(--accent); color: var(--accent-ink); font-size: .7rem; font-weight: 600; }
+.running-note { background: var(--alert-soft); color: var(--alert); padding: 8px 10px; border-radius: 4px; }
+.rules { display: grid; gap: 8px; font-size: .84rem; }
+.rules li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px; }
+.rules .mark { font-weight: 700; color: var(--muted); } .rules .mark.ok { color: var(--accent); } .rules .mark.no { color: var(--alert); }
+.rules .ids { font-family: var(--mono); }
+.feed { display: grid; gap: 4px; max-height: 420px; overflow-y: auto; font-size: .8rem; }
+.feed li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 6px; }
+.feed .s { font-family: var(--mono); color: var(--muted); }
+.dev { color: var(--alert); }
+.why { color: var(--muted); font-style: italic; }
+.confirm { display: grid; gap: 8px; border: 1.5px solid var(--alert); background: var(--alert-soft); border-radius: 6px; padding: 12px; }
+.confirm textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; resize: vertical; width: 100%; }
+.confirm-actions, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: .78rem; }
+.chip:hover { border-color: var(--accent); }
+.devlist { display: grid; gap: 6px; font-size: .84rem; }
+.devlist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; border-left: 3px solid var(--alert); padding-left: 8px; }
+.devlist .why { grid-column: 1 / -1; }
+.err { color: var(--alert); font-size: .85rem; }
+@media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { position: static; max-height: none; } .feed { max-height: 260px; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top"><h1>Bàn điều phối Koffer</h1><p class="meta" id="meta" aria-live="polite">Đang tải…</p></header>
+  <div class="layout">
+    <section class="panel">
+      <div class="head"><h2>Hồ sơ</h2><div class="picker"><label class="l" for="cases">Đang xem</label><select id="cases"></select><button class="primary" id="open-case">Mở hồ sơ mới</button></div></div>
+      <div id="detail" class="stack"><p>Chọn hoặc mở một hồ sơ.</p></div>
+    </section>
+    <aside class="side">
+      <section class="panel" id="advice"><h2>Khuyến nghị</h2></section>
+      <details class="panel"><summary>Quy định quy trình</summary><ul class="rules" id="rules"></ul></details>
+      <details class="panel" open><summary>Sự kiện trực tiếp</summary><ol class="feed" id="feed" aria-live="polite"></ol></details>
+    </aside>
+  </div>
+</div>
+<script>
+const ATTR = { A: "Chi phí sửa chữa ròng", B: "Số lần sửa mỗi năm", C: "Độ tin cậy khách hàng", D: "Giá thị trường trung bình", E: "Năng lực nội bộ", F: "Khả năng PMA/DER", G: "Hạng mục phát sinh", H: "Thời hạn hợp đồng (năm)", I: "Chi phí vận chuyển" };
+const TASK = { alpha: "Mở giai đoạn: xác định tổng chi phí sửa chữa", beta: "Mở giai đoạn: xác định số lần sửa", 2: "Xin phép cơ quan quản lý thị trường", 3: "Thu thập thông tin hợp đồng", 4: "Thu thập thông tin khách hàng", A: "Lấy chi phí sửa chữa ròng", B: "Ước tính số lần sửa mỗi năm", C: "Kiểm tra độ tin cậy khách hàng", D: "Ước tính giá thị trường", E: "Kiểm tra năng lực nội bộ", F: "Xác định khả năng PMA/DER", G: "Xác định hạng mục phát sinh", H: "Chốt thời hạn hợp đồng", I: "Lấy chi phí vận chuyển" };
+const SHORT = { alpha: "Tổng chi phí sửa chữa", beta: "Số lần sửa", 2: "Xin phép thị trường", 3: "Thông tin hợp đồng", 4: "Thông tin khách hàng", A: "Chi phí sửa ròng", B: "Số lần sửa/năm", C: "Độ tin cậy KH", D: "Giá thị trường", E: "Năng lực nội bộ", F: "PMA/DER", G: "Hạng mục phát sinh", H: "Thời hạn HĐ", I: "Chi phí vận chuyển" };
+const PHASES = [["request_recommender", "Hỏi bộ khuyến nghị"], ["information_or_decision", "Chờ người quyết định"], ["task_running", "Đang chạy tác vụ"], ["closed", "Đã đóng"]];
+const AUTO_DELAY_MS = 900;
+const $ = (id) => document.getElementById(id);
+const num = (x, d = 1) => Number(x).toLocaleString("vi-VN", { minimumFractionDigits: d, maximumFractionDigits: d });
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const label = (id) => ({ alpha: "α", beta: "β" })[id] || id;
+const decisionName = (d) => (typeof d === "string" ? "Không báo giá" : `Báo giá ${d}`);
+const actionName = (a) => (a.kind === "do" ? TASK[a.id] || a.id : decisionName(a.decision));
+const REASONS = ["Kinh nghiệm với khách hàng này", "Quy định nội bộ của công ty", "Có thông tin chưa nằm trong mô hình"];
+const TIE = 1e-9;
+let selected = null, stream = null, lastError = "", model = null, current = null, auto = false, autoTimer = null, pending = null;
+const sameAction = (a, b) => a.kind === b.kind && (a.kind === "do" ? a.id === b.id : a.decision === b.decision);
+
+async function api(path, body) {
+  const options = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const response = await fetch(path, options);
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || response.statusText);
+  return payload;
+}
+
+// The case model comes from the package (/api/meta), so the diagram follows whatever CMMN model was compiled.
+function buildModel(meta) {
+  const items = [
+    ...meta.plan_items.map((i) => ({ ...i, attr: false })),
+    ...meta.attributes.map((a) => ({ ...a, kind: "attribute", attr: true })),
+  ];
+  const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+  const depth = {};
+  const depthOf = (id) => (depth[id] ??= byId[id].preceding.length ? 1 + Math.max(...byId[id].preceding.map(depthOf)) : 0);
+  items.forEach((i) => depthOf(i.id));
+  // Each item hangs under its deepest predecessor; leaves take consecutive rows, parents sit between their children.
+  const children = {};
+  for (const item of items) {
+    if (!item.preceding.length) continue;
+    item.parent = item.preceding.reduce((a, b) => (depth[b] >= depth[a] ? b : a));
+    (children[item.parent] ||= []).push(item.id);
+  }
+  const row = {};
+  let next = 0;
+  const place = (id) => {
+    const kids = children[id] || [];
+    if (!kids.length) return (row[id] = next++);
+    const rows = kids.map(place);
+    return (row[id] = (rows[0] + rows[rows.length - 1]) / 2);
+  };
+  items.filter((i) => !i.parent).forEach((i) => place(i.id));
+  const descendants = (id) => (children[id] || []).flatMap((k) => [k, ...descendants(k)]);
+  return { items, byId, depth, row, rows: next, maxDepth: Math.max(...Object.values(depth)), children, descendants };
+}
+
+const isDone = (view, id) => (model.byId[id].attr ? view.attributes[id] !== null : Boolean(view.plan_items[id]));
+const requiredItems = () => model.items.filter((i) => i.required);
+
+function nodeState(view, id) {
+  if (isDone(view, id)) return "done";
+  if (view.running_task === id) return "running";
+  const action = view.recommendation && view.recommendation.actions.find((a) => a.kind === "do" && a.id === id);
+  if (action) return action.recommended ? "best" : "open";
+  if (view.phase === "closed") return "skipped";
+  return model.byId[id].preceding.every((p) => isDone(view, p)) ? "waiting" : "locked";
+}
+
+function describeNode(view, id) {
+  const item = model.byId[id];
+  const kind = item.kind === "stage" ? "Giai đoạn" : item.attr ? "Tác vụ thu thập thông tin" : "Tác vụ thủ tục";
+  const head = `<b>${esc(label(id))}. ${esc(TASK[id] || item.name)}</b> — ${kind}, ${item.required ? "bắt buộc" : "tùy chọn"}, chi phí ${num(item.cost, 0)}.`;
+  const waiting = item.preceding.filter((p) => !isDone(view, p));
+  const action = view.recommendation && view.recommendation.actions.find((a) => a.kind === "do" && a.id === id);
+  switch (nodeState(view, id)) {
+    case "done": return `${head} Đã xong${item.attr ? `, ${esc(ATTR[id])} = <b>${esc(view.attributes[id])}</b>` : ""}.`;
+    case "running": return `${head} Đang chạy, kết quả sẽ tự cập nhật.`;
+    case "best": return `${head} <b>Bộ khuyến nghị chọn bước này.</b> Lợi nhuận kỳ vọng nếu làm: ${num(action.expected_profit)}. Bấm vào nút để làm.`;
+    case "open": return `${head} Được phép làm. Lợi nhuận kỳ vọng nếu làm: ${num(action.expected_profit)}. Bấm vào nút để làm khác khuyến nghị.`;
+    case "skipped": return `${head} Không làm trong hồ sơ này${item.attr && view.scenario ? `; giá trị thật là ${esc(view.scenario[id])}` : ""}.`;
+    case "waiting": return `${head} Đủ điều kiện, chờ tác vụ đang chạy xong.`;
+    default: return `${head} Chưa mở khóa: phải xong ${waiting.map((p) => esc(label(p))).join(", ")} trước.`;
+  }
+}
+
+function describeDecision(view) {
+  const missing = requiredItems().filter((i) => !isDone(view, i.id)).map((i) => label(i.id));
+  if (view.phase === "closed") return `<b>Quyết định cuối:</b> ${esc(decisionName(view.decision))}. Hồ sơ đã đóng.`;
+  if (missing.length) return `<b>Quyết định báo giá</b> chưa được phép: còn thiếu mục bắt buộc ${missing.map(esc).join(", ")}.`;
+  const decides = view.recommendation ? view.recommendation.actions.filter((a) => a.kind === "decide") : [];
+  const best = decides.find((a) => a.recommended);
+  return `<b>Quyết định báo giá</b> đã được phép. ${decides.map((a) => `${esc(decisionName(a.decision))}: ${num(a.expected_profit)}`).join(" · ")}.` +
+    (best ? " <b>Bộ khuyến nghị chọn quyết định ngay.</b>" : " Bộ khuyến nghị cho rằng thu thập thêm thông tin vẫn đáng.");
+}
+
+const ARROWS = `<defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+  <marker id="ah-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-on" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>`;
+
+function box(x, y, w, h, cls, title, sub, attrs = "", glyph = "", required = false) {
+  return `<g class="node ${cls}" ${attrs}>
+    <rect class="halo" x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="8"/>
+    <rect class="box" x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>
+    ${required ? `<rect class="req" x="${x + 3}" y="${y + 6}" width="4" height="${h - 12}" rx="1"/>` : ""}
+    <text x="${x + 12}" y="${y + 17}">${title}</text>
+    <text class="sub" x="${x + 12}" y="${y + 32}">${sub}</text>
+    ${glyph ? `<text class="glyph" x="${x + w - 8}" y="${y + 17}">${glyph}</text>` : ""}
+  </g>`;
+}
+
+// Fig. 1, deployment phase: the loop the engine runs for every case.
+function loopDiagram(view) {
+  const step = { request_recommender: "R", information_or_decision: "C", task_running: "T", closed: "X" }[view.phase];
+  const order = { R: 0, C: 1, T: 2, X: 3 };
+  const cls = (k) => (k === step ? "current" : view.phase === "closed" || order[k] < order[step] ? "past" : "");
+  const running = view.running_task ? `${label(view.running_task)}. ${SHORT[view.running_task] || ""}` : "thu thập thông tin";
+  const edge = (d, on) => `<path class="edge${on ? " on" : ""}" d="${d}" marker-end="url(#${on ? "ah-on" : "ah"})"/>`;
+  return `<svg class="diagram loop" viewBox="0 0 700 168" role="img" aria-label="Vòng điều phối, bước hiện tại: ${esc(Object.fromEntries(PHASES)[view.phase])}">${ARROWS}
+    ${edge("M206,42 H258", step === "C")}
+    ${edge("M452,42 H504", step === "X")}
+    ${edge("M357,68 V100", step === "T")}
+    ${edge("M262,130 H111 V72", step === "R" && view.cost > 0)}
+    <text class="edge-label" x="480" y="9" text-anchor="middle">quyết định</text>
+    <text class="edge-label" x="364" y="90">thông tin</text>
+    <text class="edge-label" x="120" y="124">kết quả → trạng thái mới</text>
+    ${box(16, 16, 190, 52, cls("R"), "1. Hỏi bộ khuyến nghị", "tra chính sách đã giải")}
+    ${box(262, 16, 190, 52, cls("C"), "2. Thông tin hay quyết định?", "người quyết định chọn")}
+    ${box(508, 16, 176, 52, cls("X"), "4. Đóng hồ sơ", view.phase === "closed" ? esc(decisionName(view.decision)) : "báo giá / không báo giá")}
+    ${box(262, 104, 190, 52, cls("T"), "3. Chạy tác vụ", esc(running))}
+  </svg>`;
+}
+
+// The case model: stages as dashed containers, predecessors as arrows, required items with a bar on the left.
+function processDiagram(view) {
+  const PAD = 14, COLW = 186, NW = 166, NH = 40, ROWH = 52;
+  const x = (id) => PAD + model.depth[id] * COLW + 6;
+  const y = (id) => PAD + model.row[id] * ROWH + 6;
+  const width = PAD * 2 + (model.maxDepth + 1) * COLW + 182;
+  const height = PAD * 2 + (model.rows - 1) * ROWH + NH + 12;
+  const stages = model.items.filter((i) => i.kind === "stage").map((s) => {
+    const members = [s.id, ...model.descendants(s.id)];
+    const x0 = Math.min(...members.map(x)) - 5, y0 = Math.min(...members.map(y)) - 5;
+    const x1 = Math.max(...members.map(x)) + NW + 5, y1 = Math.max(...members.map(y)) + NH + 5;
+    return `<rect class="stage-box" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="8"/>`;
+  }).join("");
+  const edges = model.items.flatMap((item) => item.preceding.map((p) => {
+    const on = isDone(view, p);
+    const sx = x(p) + NW, sy = y(p) + NH / 2, tx = x(item.id) - 2, ty = y(item.id) + NH / 2;
+    const mid = (sx + tx) / 2;
+    return `<path class="edge${on ? " on" : ""}" d="M${sx},${sy} C${mid},${sy} ${mid},${ty} ${tx},${ty}" marker-end="url(#${on ? "ah-on" : "ah"})"/>`;
+  })).join("");
+  const glyphs = { done: "✓", running: "…", best: "★", open: "›", locked: "🔒", waiting: "", skipped: "–" };
+  const nodes = model.items.map((item) => {
+    const state = nodeState(view, item.id);
+    const clickable = state === "best" || state === "open";
+    const value = item.attr && view.attributes[item.id] !== null ? `= ${esc(view.attributes[item.id])}` :
+      state === "skipped" && item.attr && view.scenario ? `thật: ${esc(view.scenario[item.id])}` : "";
+    const sub = value || `${item.kind === "stage" ? "giai đoạn · " : ""}${item.required ? "bắt buộc" : "tùy chọn"} · ${num(item.cost, 0)}`;
+    const attrs = `data-node="${esc(item.id)}" tabindex="0"` +
+      (clickable ? ` role="button" data-action='${esc(JSON.stringify({ kind: "do", id: item.id }))}' aria-label="Làm ${esc(TASK[item.id] || item.id)}"` : "");
+    return box(x(item.id), y(item.id), NW, NH, state, `${esc(label(item.id))}. ${esc(SHORT[item.id] || item.name)}`, sub, attrs, glyphs[state], item.required);
+  }).join("");
+  // The decision gate: allowed only once every required item is done.
+  const dx = PAD + (model.maxDepth + 1) * COLW + 20, dh = 92, dy = PAD + ((model.rows - 1) * ROWH + NH) / 2 - dh / 2 + 6;
+  const req = requiredItems();
+  const ready = req.every((i) => isDone(view, i.id));
+  const decideBest = view.recommendation && view.recommendation.best.kind === "decide";
+  const dstate = view.phase === "closed" ? "done" : decideBest ? "best" : ready && view.phase !== "task_running" ? "open" : "locked";
+  const chipW = 26;
+  const chips = req.map((i, k) => `<g class="gate${isDone(view, i.id) ? " ok" : ""}"><rect x="${dx + 10 + k * (chipW + 2)}" y="${dy + 50}" width="${chipW}" height="18" rx="3"/><text x="${dx + 10 + k * (chipW + 2) + chipW / 2}" y="${dy + 63}">${esc(label(i.id))}</text></g>`).join("");
+  const decision = box(dx, dy, 160, dh, dstate, "Quyết định báo giá", view.phase === "closed" ? esc(decisionName(view.decision)) : `cần mục bắt buộc ${req.filter((i) => isDone(view, i.id)).length}/${req.length}`,
+    `data-node="__decision" tabindex="0"${dstate === "best" || dstate === "open" ? ' role="button"' : ""}`, { done: "✓", best: "★", open: "›", locked: "🔒" }[dstate]) + chips;
+  return `<svg class="diagram process" viewBox="0 0 ${width} ${height}" role="img" aria-label="Mô hình hồ sơ CMMN và trạng thái từng bước">${ARROWS}${stages}${edges}${nodes}${decision}</svg>`;
+}
+
+function rulesPanel(view) {
+  const req = requiredItems(), optional = model.items.filter((i) => !i.required);
+  const doneReq = view ? req.filter((i) => isDone(view, i.id)).length : 0;
+  const ids = (list) => `<span class="ids">${list.map((i) => esc(label(i.id ?? i))).join(", ")}</span>`;
+  const stages = model.items.filter((i) => i.kind === "stage").map((s) => {
+    const inside = model.items.filter((i) => i.preceding.includes(s.id));
+    return `Giai đoạn ${esc(label(s.id))} phải mở trước ${ids(inside)}${s.required ? " (giai đoạn bắt buộc)" : ""}.`;
+  });
+  const order = model.items.filter((i) => i.preceding.some((p) => model.byId[p].kind !== "stage")).map((i) =>
+    `${esc(label(i.id))} sau ${ids(i.preceding.filter((p) => model.byId[p].kind !== "stage"))}`);
+  const mark = (ok) => `<span class="mark ${ok ? "ok" : "no"}">${ok ? "✓" : "○"}</span>`;
+  const rows = [
+    [view ? doneReq === req.length : null, `<b>Mục bắt buộc</b> ${ids(req)} phải xong trước khi quyết định báo giá.${view ? ` Hồ sơ này: ${doneReq}/${req.length}.` : ""}`],
+    [null, `<b>Mục tùy chọn</b> ${ids(optional)} chỉ làm khi đáng: bộ khuyến nghị cân chi phí với giá trị thông tin.`],
+    ...stages.map((t) => [null, t]),
+    [null, `<b>Thứ tự trước sau:</b> ${order.join("; ")}.`],
+    [null, "Mỗi tác vụ làm tối đa một lần, chi phí tính khi làm. Mỗi lần chỉ chạy một tác vụ."],
+    [null, "Người quyết định có thể chọn khác khuyến nghị; nhật ký ghi lại \"khác khuyến nghị\"."],
+  ];
+  $("rules").innerHTML = rows.map(([ok, text]) => `<li>${ok === null ? '<span class="mark">•</span>' : mark(ok)}<span>${text}</span></li>`).join("");
+}
+
+async function refreshList() {
+  const cases = await api("/api/cases");
+  const names = Object.fromEntries(PHASES);
+  $("cases").innerHTML = cases.slice().reverse().map((c) => `<option value="${esc(c.case_id)}"${c.case_id === selected ? " selected" : ""}>${esc(c.case_id)} · ${names[c.phase]}</option>`).join("");
+}
+
+async function refreshMeta() {
+  const meta = await api("/api/meta");
+  if (!model) model = buildModel(meta);
+  const l = meta.latency;
+  $("meta").textContent = `Gói ${meta.manifest.case}/${meta.manifest.y_variant} · V(gốc) ${num(meta.manifest.root_value, 2)}` + (l.count ? ` · độ trễ khuyến nghị: trung vị ${num(l.median_ms, 2)} ms, p99 ${num(l.p99_ms, 2)} ms (${l.count} lần)` : "");
+}
+
+function defaultInfo(view) {
+  if (view.phase === "closed") return describeDecision(view);
+  if (view.phase === "task_running") return describeNode(view, view.running_task);
+  const best = view.recommendation && view.recommendation.best;
+  if (!best) return "Đang hỏi bộ khuyến nghị…";
+  return best.kind === "do" ? describeNode(view, best.id) : describeDecision(view);
+}
+
+function deviationPanel() {
+  return `<div class="confirm" role="alertdialog" aria-labelledby="confirm-title">
+    <p id="confirm-title"><b>Bạn đang chọn khác khuyến nghị:</b> ${esc(pending.name)}.</p>
+    <p>Lợi nhuận kỳ vọng thấp hơn khuyến nghị <b class="q">${num(pending.loss)}</b>. Hệ thống vẫn làm theo lựa chọn của bạn và khuyến nghị tiếp từ trạng thái mới.</p>
+    <label class="l" for="reason">Lý do (kinh nghiệm, thông tin ngoài mô hình). Lý do được ghi vào nhật ký hồ sơ.</label>
+    <div class="chips">${REASONS.map((r) => `<button type="button" class="chip" data-reason-chip="${esc(r)}">${esc(r)}</button>`).join("")}</div>
+    <textarea id="reason" rows="2" maxlength="500" placeholder="Ví dụ: hợp đồng ngắn hạn thường lỗ, luôn chốt thời hạn trước khi báo giá"></textarea>
+    <div class="confirm-actions"><button type="button" class="primary" data-confirm>Vẫn chọn</button><button type="button" class="toggle" data-cancel>Quay lại khuyến nghị</button></div>
+  </div>`;
+}
+
+function deviationSummary(view) {
+  const list = view.deviations || [];
+  if (!list.length) return `<p class="l">Hồ sơ đi đúng mọi khuyến nghị.</p>`;
+  const total = list.reduce((s, d) => s + (d.expected_loss || 0), 0);
+  return `<h3>Các lần làm khác khuyến nghị</h3>
+    <p class="l">${list.length} lần, cộng các mức thiệt kỳ vọng tại từng bước: ${num(total)}.</p>
+    <ul class="devlist">${list.map((d) => `<li><span>${esc(actionName(d.action))} thay cho ${esc(actionName(d.recommended))}</span><span class="q">−${num(d.expected_loss || 0)}</span>${d.reason ? `<span class="why">Lý do: ${esc(d.reason)}</span>` : ""}</li>`).join("")}</ul>`;
+}
+
+function renderDetail(view) {
+  current = view;
+  if (pending && (view.phase !== "information_or_decision" || pending.caseId !== view.case_id)) pending = null;
+  const rec = view.recommendation;
+  let body = "";
+  if (pending) {
+    body = deviationPanel();
+  } else if (view.phase === "task_running") {
+    body = `<p class="running-note">Đang chạy: ${esc(TASK[view.running_task])}. Kết quả sẽ tự cập nhật.</p>`;
+  } else if (rec) {
+    body = `<div class="stats"><div><span class="l">Đã chi</span><span class="v2">${num(view.cost)}</span></div><div><span class="l">Kỳ vọng còn lại</span><span class="v2">${num(rec.value)}</span></div><div><span class="l">Kỳ vọng cả hồ sơ</span><span class="v2">${num(rec.value - view.cost)}</span></div></div>
+    <h3>Tập hành động và khuyến nghị</h3><ul class="actions">${rec.actions.map((a) => `<li><button class="action${a.recommended ? " best" : ""}" data-action='${esc(JSON.stringify({ kind: a.kind, id: a.id, decision: a.decision }))}'><span>${esc(actionName(a))}${a.recommended ? '<span class="pill">Khuyến nghị</span>' : ""}</span><span class="q">${num(a.expected_profit)}</span></button></li>`).join("")}</ul>`;
+  } else if (view.phase === "closed") {
+    const o = view.outcome;
+    body = `<div class="stats"><div><span class="l">Quyết định</span><span class="v2">${esc(decisionName(view.decision))}</span></div><div><span class="l">Lợi nhuận kỳ vọng lúc chốt</span><span class="v2">${num(o.expected_profit)}</span></div><div><span class="l">Lợi nhuận tại giá trị thật</span><span class="v2">${num(o.realised_profit ?? o.expected_profit)}</span></div></div><p class="l">Chi phí đã bỏ ra ${num(o.cost)}. Ô mờ trên sơ đồ là bước không làm; "thật" là giá trị chưa từng được mua.</p>${deviationSummary(view)}`;
+  }
+  $("detail").innerHTML = `<h3>Vòng điều phối (Fig. 1, pha triển khai)</h3>${loopDiagram(view)}
+    <h3>Quy trình hồ sơ (mô hình CMMN)</h3>${processDiagram(view)}
+    <div class="legend"><span><i class="best"></i>Khuyến nghị</span><span><i class="open"></i>Được phép</span><span><i class="running"></i>Đang chạy</span><span><i class="done"></i>Đã xong</span><span><i class="locked"></i>Chưa mở khóa</span><span><i class="req"></i>Bắt buộc</span><span>Khung nét đứt: giai đoạn</span></div>`;
+  $("advice").innerHTML = `<div class="head"><h2>Khuyến nghị</h2><button class="toggle" id="auto" aria-pressed="${auto}">${auto ? "Dừng tự chạy" : "Tự chạy theo khuyến nghị"}</button></div>
+    <p class="info" id="info" aria-live="polite">${defaultInfo(view)}</p>
+    ${body}${lastError ? `<p class="err" role="alert">${esc(lastError)}</p>` : ""}`;
+  rulesPanel(view);
+  scheduleAuto(view);
+}
+
+// Auto-run: follow the recommendation step by step, so the whole business process plays out on the diagrams.
+function scheduleAuto(view) {
+  clearTimeout(autoTimer);
+  if (!auto || pending || view.phase !== "information_or_decision" || !view.recommendation) return;
+  const caseId = view.case_id;
+  autoTimer = setTimeout(() => { if (auto && selected === caseId) choose(view.recommendation.best); }, AUTO_DELAY_MS);
+}
+
+// A choice worse than the advice asks for confirmation and a reason first; ties go straight through.
+function requestChoice(action) {
+  const rec = current && current.recommendation;
+  const entry = rec && rec.actions.find((a) => sameAction(a, action));
+  const best = rec && rec.actions.find((a) => a.recommended);
+  const loss = entry && best ? best.expected_profit - entry.expected_profit : 0;
+  if (entry && !entry.recommended && loss > TIE) {
+    pending = { caseId: current.case_id, action, loss, name: actionName(entry) };
+    renderDetail(current);
+    $("reason").focus();
+    return;
+  }
+  choose(action);
+}
+
+async function choose(action, reason) {
+  try {
+    lastError = "";
+    pending = null;
+    renderDetail(await api(`/api/cases/${selected}/actions`, reason ? { ...action, reason } : action));
+  } catch (error) {
+    lastError = error.message;
+    renderDetail(await api(`/api/cases/${selected}`));
+  }
+}
+
+function describe(e) {
+  switch (e.type) {
+    case "case_opened": return "Mở hồ sơ";
+    case "recommendation": return `Khuyến nghị: ${esc(actionName(e.recommendation.best))}`;
+    case "action_selected": {
+      if (e.followed) return `Chọn: ${esc(actionName(e.action))}`;
+      const loss = e.expected_loss > TIE ? `, thiệt kỳ vọng ${num(e.expected_loss)}` : e.expected_loss === undefined ? "" : ", cùng giá trị";
+      return `Chọn: ${esc(actionName(e.action))} <span class="dev">(khác khuyến nghị${loss})</span>` + (e.reason ? `<br><span class="why">Lý do: ${esc(e.reason)}</span>` : "");
+    }
+    case "task_launched": return `Chạy tác vụ: ${esc(TASK[e.task] || e.task)}`;
+    case "task_completed": return `Xong: ${esc(TASK[e.task] || e.task)}` + (e.value !== null && e.value !== undefined ? ` = ${esc(e.value)}` : "");
+    case "task_failed": return `<span class="dev">Lỗi tác vụ ${esc(e.task)}: ${esc(e.error)}</span>`;
+    case "case_closed": return `Đóng hồ sơ: ${esc(decisionName(e.decision))}`;
+    default: return esc(e.type);
+  }
+}
+
+async function selectCase(caseId) {
+  selected = caseId; lastError = "";
+  if (stream) stream.close();
+  $("feed").innerHTML = "";
+  stream = new EventSource(`/api/cases/${caseId}/events`);
+  stream.onmessage = async (message) => {
+    const event = JSON.parse(message.data);
+    $("feed").insertAdjacentHTML("afterbegin", `<li><span class="s">${event.seq}</span><span>${describe(event)}</span></li>`);
+    if (caseId !== selected) return;
+    renderDetail(await api(`/api/cases/${caseId}`));
+    refreshList(); refreshMeta();
+    if (event.type === "case_closed") stream.close();
+  };
+  renderDetail(await api(`/api/cases/${caseId}`));
+  refreshList();
+}
+
+$("open-case").addEventListener("click", async () => {
+  const view = await api("/api/cases", {});
+  await selectCase(view.case_id);
+});
+$("cases").addEventListener("change", (event) => selectCase(event.target.value));
+// Diagram nodes (left) and action buttons (right) share one handler.
+document.querySelector(".layout").addEventListener("click", (event) => {
+  if (event.target.closest("#auto")) {
+    auto = !auto;
+    renderDetail(current);
+    return;
+  }
+  const chip = event.target.closest("[data-reason-chip]");
+  if (chip) { $("reason").value = chip.dataset.reasonChip; $("reason").focus(); return; }
+  if (event.target.closest("[data-confirm]") && pending) { choose(pending.action, $("reason").value); return; }
+  if (event.target.closest("[data-cancel]")) { pending = null; renderDetail(current); return; }
+  const target = event.target.closest("[data-action]");
+  if (target) { requestChoice(JSON.parse(target.dataset.action)); return; }
+  const node = event.target.closest("[data-node]");
+  if (node && node.dataset.node === "__decision") {
+    const first = $("advice").querySelector(".action[data-action*='decide']");
+    if (first) first.focus();
+  }
+});
+const showInfo = (event) => {
+  const node = event.target.closest && event.target.closest("[data-node]");
+  if (!node || !current || !$("info")) return;
+  $("info").innerHTML = node.dataset.node === "__decision" ? describeDecision(current) : describeNode(current, node.dataset.node);
+};
+$("detail").addEventListener("pointerover", showInfo);
+$("detail").addEventListener("focusin", showInfo);
+$("detail").addEventListener("keydown", (event) => {
+  const node = event.target.closest("[data-node]");
+  if (node && (event.key === "Enter" || event.key === " ")) {
+    event.preventDefault();
+    node.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  }
+});
+(async () => {
+  await refreshMeta();
+  rulesPanel(null);
+  await refreshList();
+  const first = $("cases").querySelector("option");
+  if (first) await selectCase(first.value);
+  else { const view = await api("/api/cases", { seed: 42 }); await selectCase(view.case_id); }
+})();
+</script>
+</body>
+</html>

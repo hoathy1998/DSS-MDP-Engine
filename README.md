@@ -38,7 +38,23 @@ python scripts/solve_koffer.py         # Pha 3
 python scripts/run_experiments.py      # Pha 4-5
 python scripts/make_summary.py         # Pha 7
 streamlit run app/streamlit_app.py     # Pha 6, xem thử bộ khuyến nghị
+python scripts/build_web_demo.py       # bản web, ghi ra web/koffer_demo.html
 ```
+
+## Hệ thống hai pha theo Fig. 1
+
+```
+python scripts/design_time.py --export-cmmn   # pha thiết kế: CMMN + tham số -> gói triển khai
+python scripts/run_system.py                  # pha triển khai: mở http://127.0.0.1:8600
+```
+
+Kiến trúc, số đo độ trễ và giới hạn nằm trong `docs/system.md`.
+
+Khi quay video: `python scripts/demo.py --task-seconds 1` (danh sách hồ sơ sạch, tự mở trình duyệt) và `python scripts/demo_rule_check.py` (máy chủ từ chối hành động sai quy định). Kịch bản ở `docs/video_script.md`; tài liệu nguồn để viết báo cáo ở `docs/cowork_brief.md`.
+
+## Demo web
+
+`web/koffer_demo.html` là bản demo không cần Python: mở bằng trình duyệt là dùng được, trình duyệt tự giải mô hình. Sửa `web/solver.js`, `web/app.js` hoặc `web/template.html` rồi chạy lại lệnh build. `tests/test_web_demo.py` đối chiếu bản JavaScript với bộ giải Python trên mọi trạng thái đi tới được, cần có Node.js.
 
 ## Bắt đầu
 
