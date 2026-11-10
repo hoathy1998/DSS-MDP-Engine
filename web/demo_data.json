@@ -1,0 +1,701 @@
+{
+ "data": {
+  "koffer": {
+   "default_variant": "margin_all",
+   "decisions": [
+    "No bid",
+    1800,
+    2000,
+    2200
+   ],
+   "plan_items": [
+    {
+     "id": "alpha",
+     "cost": 20,
+     "preceding": [],
+     "required": false
+    },
+    {
+     "id": "beta",
+     "cost": 0,
+     "preceding": [],
+     "required": true
+    },
+    {
+     "id": "2",
+     "cost": 20,
+     "preceding": [],
+     "required": false
+    },
+    {
+     "id": "3",
+     "cost": 10,
+     "preceding": [],
+     "required": true
+    },
+    {
+     "id": "4",
+     "cost": 30,
+     "preceding": [],
+     "required": true
+    }
+   ],
+   "attributes": [
+    {
+     "id": "A",
+     "task_id": "5",
+     "cost": 10,
+     "preceding": [
+      "alpha"
+     ],
+     "required": false,
+     "values": [
+      1500,
+      1700,
+      1900,
+      2100
+     ],
+     "probs": [
+      0.25,
+      0.25,
+      0.25,
+      0.25
+     ],
+     "mean": 1800.0
+    },
+    {
+     "id": "B",
+     "task_id": "6",
+     "cost": 8,
+     "preceding": [
+      "beta"
+     ],
+     "required": false,
+     "values": [
+      40,
+      60,
+      80,
+      100
+     ],
+     "probs": [
+      0.5120000000000001,
+      0.3840000000000001,
+      0.09600000000000003,
+      0.008000000000000002
+     ],
+     "mean": 52.00000000000001
+    },
+    {
+     "id": "C",
+     "task_id": "7",
+     "cost": 2,
+     "preceding": [],
+     "required": true,
+     "values": [
+      0,
+      1
+     ],
+     "probs": [
+      0.7,
+      0.3
+     ],
+     "mean": 0.3
+    },
+    {
+     "id": "D",
+     "task_id": "8",
+     "cost": 100,
+     "preceding": [
+      "2"
+     ],
+     "required": false,
+     "values": [
+      1700,
+      1900,
+      2100,
+      2300
+     ],
+     "probs": [
+      0.125,
+      0.375,
+      0.375,
+      0.125
+     ],
+     "mean": 2000.0
+    },
+    {
+     "id": "E",
+     "task_id": "9",
+     "cost": 3,
+     "preceding": [],
+     "required": true,
+     "values": [
+      0,
+      1
+     ],
+     "probs": [
+      0.4,
+      0.6
+     ],
+     "mean": 0.6
+    },
+    {
+     "id": "F",
+     "task_id": "10",
+     "cost": 20,
+     "preceding": [
+      "alpha",
+      "A"
+     ],
+     "required": false,
+     "values": [
+      100,
+      200
+     ],
+     "probs": [
+      0.7,
+      0.3
+     ],
+     "mean": 130.0
+    },
+    {
+     "id": "G",
+     "task_id": "11",
+     "cost": 15,
+     "preceding": [
+      "alpha",
+      "A"
+     ],
+     "required": false,
+     "values": [
+      0,
+      1
+     ],
+     "probs": [
+      0.5,
+      0.5
+     ],
+     "mean": 0.5
+    },
+    {
+     "id": "H",
+     "task_id": "12",
+     "cost": 4,
+     "preceding": [
+      "beta"
+     ],
+     "required": false,
+     "values": [
+      1,
+      2,
+      3,
+      4
+     ],
+     "probs": [
+      0.1666666666666667,
+      0.3333333333333333,
+      0.3333333333333333,
+      0.1666666666666667
+     ],
+     "mean": 2.5000000000000004
+    },
+    {
+     "id": "I",
+     "task_id": "13",
+     "cost": 12,
+     "preceding": [
+      "4"
+     ],
+     "required": false,
+     "values": [
+      50,
+      100,
+      150,
+      200
+     ],
+     "probs": [
+      0.25,
+      0.25,
+      0.25,
+      0.25
+     ],
+     "mean": 125.0
+    }
+   ],
+   "variants": {
+    "margin_all": {
+     "expression": "E*B*H*P*(f - A*(1-0.2*G) - F - I)",
+     "free": [
+      "3",
+      "C"
+     ]
+    },
+    "margin_repair": {
+     "expression": "E*B*H*P*(f - A*(1-0.2*G)) - F - I",
+     "free": [
+      "3",
+      "C"
+     ]
+    }
+   },
+   "accept": {
+    "1800": {
+     "by_value": [
+      0.30853753872598694,
+      0.691462461274013,
+      0.9331927987311419,
+      0.9937903346742238
+     ],
+     "unknown": 0.7720367066769594
+    },
+    "2000": {
+     "by_value": [
+      0.06680720126885809,
+      0.30853753872598694,
+      0.691462461274013,
+      0.9331927987311419
+     ],
+     "unknown": 0.4999999999999999
+    },
+    "2200": {
+     "by_value": [
+      0.006209665325776139,
+      0.06680720126885809,
+      0.30853753872598694,
+      0.691462461274013
+     ],
+     "unknown": 0.22796329332304052
+    }
+   }
+  },
+  "toy": {
+   "default_variant": "toy",
+   "decisions": [
+    0,
+    1
+   ],
+   "plan_items": [],
+   "attributes": [
+    {
+     "id": "X1",
+     "task_id": "t1",
+     "cost": 0.5,
+     "preceding": [],
+     "required": false,
+     "values": [
+      0,
+      3
+     ],
+     "probs": [
+      0.5,
+      0.5
+     ],
+     "mean": 1.5
+    },
+    {
+     "id": "X2",
+     "task_id": "t2",
+     "cost": 0.5,
+     "preceding": [],
+     "required": false,
+     "values": [
+      1,
+      4
+     ],
+     "probs": [
+      0.5,
+      0.5
+     ],
+     "mean": 2.5
+    }
+   ],
+   "variants": {
+    "toy": {
+     "expression": "(X2 - X1) * f",
+     "free": []
+    }
+   },
+   "accept": null
+  },
+  "tree": {
+   "root": "checkE",
+   "nodes": {
+    "checkE": {
+     "type": "check",
+     "attribute": "E",
+     "branches": {
+      "0": "declineE",
+      "1": "stageBeta"
+     }
+    },
+    "declineE": {
+     "type": "do",
+     "items": [
+      "3",
+      "4",
+      "C",
+      "beta"
+     ],
+     "next": "decline"
+    },
+    "stageBeta": {
+     "type": "do",
+     "items": [
+      "beta"
+     ],
+     "next": "checkB"
+    },
+    "checkB": {
+     "type": "check",
+     "attribute": "B",
+     "branches": {
+      "40": "checkH_low",
+      "60": "checkH_low",
+      "80": "checkH_high",
+      "100": "checkH_high"
+     }
+    },
+    "checkH_low": {
+     "type": "check",
+     "attribute": "H",
+     "branches": {
+      "1": "decline347",
+      "2": "decline347",
+      "3": "stageAlpha",
+      "4": "stageAlpha"
+     }
+    },
+    "checkH_high": {
+     "type": "check",
+     "attribute": "H",
+     "branches": {
+      "1": "decline347",
+      "2": "stageAlpha",
+      "3": "stageAlpha",
+      "4": "stageAlpha"
+     }
+    },
+    "stageAlpha": {
+     "type": "do",
+     "items": [
+      "alpha"
+     ],
+     "next": "checkA"
+    },
+    "checkA": {
+     "type": "check",
+     "attribute": "A",
+     "branches": {
+      "1500": "task2",
+      "1700": "task2",
+      "1900": "checkF",
+      "2100": "checkF"
+     }
+    },
+    "checkF": {
+     "type": "check",
+     "attribute": "F",
+     "branches": {
+      "100": "checkG",
+      "200": "task2"
+     }
+    },
+    "checkG": {
+     "type": "check",
+     "attribute": "G",
+     "branches": {
+      "0": "decline347",
+      "1": "task2"
+     }
+    },
+    "task2": {
+     "type": "do",
+     "items": [
+      "2"
+     ],
+     "next": "checkD"
+    },
+    "checkD": {
+     "type": "check",
+     "attribute": "D",
+     "branches": {
+      "1700": "bid1800",
+      "1900": "bid1800",
+      "2100": "task4",
+      "2300": "task4"
+     }
+    },
+    "bid1800": {
+     "type": "do",
+     "items": [
+      "3",
+      "4",
+      "C"
+     ],
+     "next": "decide1800"
+    },
+    "task4": {
+     "type": "do",
+     "items": [
+      "4"
+     ],
+     "next": "checkI"
+    },
+    "checkI": {
+     "type": "check",
+     "attribute": "I",
+     "branches": {
+      "50": "bid2000",
+      "100": "bid2000",
+      "150": "bid2200",
+      "200": "bid2200"
+     }
+    },
+    "bid2000": {
+     "type": "do",
+     "items": [
+      "3",
+      "C"
+     ],
+     "next": "decide2000"
+    },
+    "bid2200": {
+     "type": "do",
+     "items": [
+      "3",
+      "C"
+     ],
+     "next": "decide2200"
+    },
+    "decline347": {
+     "type": "do",
+     "items": [
+      "3",
+      "4",
+      "C"
+     ],
+     "next": "decline"
+    },
+    "decline": {
+     "type": "decide",
+     "decision": "No bid"
+    },
+    "decide1800": {
+     "type": "decide",
+     "decision": 1800
+    },
+    "decide2000": {
+     "type": "decide",
+     "decision": 2000
+    },
+    "decide2200": {
+     "type": "decide",
+     "decision": 2200
+    }
+   },
+   "ambiguities": [
+    "Fig. 8 labels the left branch of Attribute A as 'A = 1900, 1200'; 1200 is not in dom(A). Read as 1900, 2100.",
+    "Line crossings around the two Attribute H nodes are hard to read. Default reading is above; alternatives are listed in docs/paper_notes.md.",
+    "With this reading only 3/9 instances of Table 6 match (5, 6, 9). A brute-force search over column orders of the binary attributes (C, E, G) and H-branch readings reached at most 6/9. See docs/paper_notes.md section 4."
+   ]
+  },
+  "table6": [
+   {
+    "instance": 1,
+    "final_state": [
+     2100,
+     40,
+     1,
+     1900,
+     1,
+     100,
+     0,
+     1,
+     150
+    ],
+    "profit_mdp": 1656,
+    "profit_tree": -122
+   },
+   {
+    "instance": 2,
+    "final_state": [
+     1500,
+     100,
+     1,
+     2100,
+     0,
+     100,
+     1,
+     4,
+     100
+    ],
+    "profit_mdp": 69794,
+    "profit_tree": 65469
+   },
+   {
+    "instance": 3,
+    "final_state": [
+     2100,
+     80,
+     1,
+     2100,
+     1,
+     200,
+     0,
+     1,
+     50
+    ],
+    "profit_mdp": -45,
+    "profit_tree": -45
+   },
+   {
+    "instance": 4,
+    "final_state": [
+     2100,
+     40,
+     0,
+     2300,
+     0,
+     200,
+     0,
+     3,
+     150
+    ],
+    "profit_mdp": 16385,
+    "profit_tree": 14692
+   },
+   {
+    "instance": 5,
+    "final_state": [
+     1900,
+     100,
+     0,
+     2300,
+     0,
+     200,
+     0,
+     4,
+     200
+    ],
+    "profit_mdp": -45,
+    "profit_tree": -45
+   },
+   {
+    "instance": 6,
+    "final_state": [
+     1900,
+     40,
+     0,
+     2300,
+     0,
+     200,
+     0,
+     3,
+     150
+    ],
+    "profit_mdp": -45,
+    "profit_tree": -45
+   },
+   {
+    "instance": 7,
+    "final_state": [
+     1500,
+     40,
+     1,
+     1900,
+     1,
+     100,
+     0,
+     1,
+     150
+    ],
+    "profit_mdp": -45,
+    "profit_tree": -45
+   },
+   {
+    "instance": 8,
+    "final_state": [
+     1700,
+     80,
+     1,
+     1700,
+     1,
+     100,
+     0,
+     2,
+     200
+    ],
+    "profit_mdp": 27416,
+    "profit_tree": 27419
+   },
+   {
+    "instance": 9,
+    "final_state": [
+     1900,
+     60,
+     0,
+     1900,
+     0,
+     100,
+     1,
+     1,
+     150
+    ],
+    "profit_mdp": -45,
+    "profit_tree": -45
+   }
+  ],
+  "table5": [
+   {
+    "label": "MDP: lợi nhuận kỳ vọng",
+    "paper": "15.867,60",
+    "margin_all": "8.762,62",
+    "margin_repair": "17.506,47"
+   },
+   {
+    "label": "MDP: chi phí trung bình",
+    "paper": "143,50",
+    "margin_all": "123,52",
+    "margin_repair": "132,47"
+   },
+   {
+    "label": "MDP: số trạng thái kết thúc",
+    "paper": "136",
+    "margin_all": "196",
+    "margin_repair": "50"
+   },
+   {
+    "label": "Cây: lợi nhuận kỳ vọng",
+    "paper": "8.226,00",
+    "margin_all": "3.643,66",
+    "margin_repair": "10.385,86"
+   },
+   {
+    "label": "Cây: chi phí trung bình",
+    "paper": "100,06",
+    "margin_all": "100,06",
+    "margin_repair": "100,06"
+   },
+   {
+    "label": "Cây: số trạng thái kết thúc",
+    "paper": "1.254",
+    "margin_all": "1.254",
+    "margin_repair": "1.254"
+   }
+  ],
+  "paper_toy": {
+   "value_no_info": 0.5,
+   "gain_acquire_X2": 0.75,
+   "conclusion": "acquire X2"
+  }
+ },
+ "functions": {
+  "koffer": {
+   "margin_all": "({A, B, C, D, E, F, G, H, I, f, P}) => (E*B*H*P*(f - A*(1-0.2*G) - F - I))",
+   "margin_repair": "({A, B, C, D, E, F, G, H, I, f, P}) => (E*B*H*P*(f - A*(1-0.2*G)) - F - I)"
+  },
+  "toy": {
+   "toy": "({X1, X2, f}) => ((X2 - X1) * f)"
+  }
+ }
+}
